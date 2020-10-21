@@ -94,7 +94,7 @@ namespace DatabaseConnectorPostgres.DbEngine
             {
                 PgSqlConnection pgSqlConnection = new PgSqlConnection(this.ConnectionString);
                 pgSqlConnection.UserId = "postgres";
-                pgSqlConnection.Password =  "pg";
+                pgSqlConnection.Password = "pg";
                 pgSqlConnection.Host = "localhost";
                 pgSqlConnection.Database = DatabaseName;
                 pgSqlConnection.Unicode = true;
