@@ -4,15 +4,20 @@ using DatabaseConnectorPostgres.Enum;
 using DatabaseConnectorPostgres.Exceptions;
 using DatabaseConnectorPostgres.Hashing;
 using DbEngDatabaseConnectorPostgresine.DAL;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DatabaseConnectorPostgres.Models
 {
 	public class User : DbFeatureItem
 	{
+		private const string TABLE_NAME = "users";
+
+
 		public string UserName
 		{
 			get
@@ -57,59 +62,8 @@ namespace DatabaseConnectorPostgres.Models
 			}
 		}
 
-		private static bool CheckIfExists(DbConnection connection, string username)
-		{
-			DbFeatureClass dbFeatureClass = new DbFeatureClass(connection, "users");
-			List<DbFeature> features = dbFeatureClass.GetFeatures(string.Format("username = '{0}'", username), "");
-			return features.Count > 0;
-		}
-
-
-		private User(DbConnection connection, long id) : base(connection, "users", id)
-		{
-		}
-
 		private User(DbFeature feature) : base(feature)
 		{
-		}
-
-		private static User CreateNew(DbConnection connection)
-		{
-			return new User(new DbFeatureClass(connection, "users").CreateFeature());
-		}
-
-		public static KeyValuePair<EnumUser, User> CreateUser(DbConnection connection, string username, string password, bool isAdmin)
-		{
-			if(!CheckIfExists(connection, username))
-			{
-				User newUser = CreateNew(connection);
-				newUser.UserName = username;
-				HashingService hashingService = new HashingService();
-				newUser.Password = hashingService.CreatePasswordHash(password);
-				newUser.IsAdmin = isAdmin;
-				newUser.Insert();
-				return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, newUser);
-			}
-			else
-			{
-				return new KeyValuePair<EnumUser, User>(EnumUser.USER_EXISTS, null);
-			}
-		}
-
-		public static User Get(DbConnection connection, long id)
-		{
-			User user = new User(connection, id);
-			bool flag = user.Feature == null;
-			User result;
-			if (flag)
-			{
-				result = null;
-			}
-			else
-			{
-				result = user;
-			}
-			return result;
 		}
 
 		public static User Get(DbFeature feature)
@@ -128,49 +82,11 @@ namespace DatabaseConnectorPostgres.Models
 			return result;
 		}
 
-		public static KeyValuePair<EnumUser, User> Get(DbConnection connection, string username)
+		public static async Task<IList<User>> GetAll(NpgsqlConnection connection)
 		{
-			DbFeatureClass dbFeatureClass = new DbFeatureClass(connection, "users");
-			List<DbFeature> features = dbFeatureClass.GetFeatures(string.Format("username = '{0}'", username), "");
-			int count = features.Count;
-			if (count == 0)
-			{
-				return new KeyValuePair<EnumUser, User>(EnumUser.USER_NOT_FOUND, null);
-			}
-			if (count != 1)
-			{
-				return new KeyValuePair<EnumUser, User>(EnumUser.MULTIPLE_USER_FOUND, null);
-			}
-			return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, new User(connection, features[0].ID));
-		}
 
-		public static KeyValuePair<EnumUser, User> Get(DbConnection connection, string username, string password)
-		{
-			DbFeatureClass dbFeatureClass = new DbFeatureClass(connection, "users");
-			List<DbFeature> features = dbFeatureClass.GetFeatures(string.Format("username = '{0}'", username), "");
-			int count = features.Count;
-			if (count == 0)
-			{
-				return new KeyValuePair<EnumUser, User>(EnumUser.USER_NOT_FOUND, null);
-			}
-			if (count != 1)
-			{
-				return new KeyValuePair<EnumUser, User>(EnumUser.MULTIPLE_USER_FOUND, null);
-			}
-			User user = new User(features[0]);
-			HashingService hashingService = new HashingService();
-			bool flag = hashingService.ValidatePasswordHash(password, user.Password);
-			if (!flag)
-			{
-				return new KeyValuePair<EnumUser, User>(EnumUser.WRONG_PASSWORD, null);
-			}
-			return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, user);
-		}
-
-		public static IList<User> GetAll(DbConnection connection)
-		{
-			DbFeatureClass dbFeatureClass = new DbFeatureClass(connection, "users");
-			List<DbFeature> features = dbFeatureClass.GetFeatures();
+			DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
+			List<DbFeature> features = await dbFeatureClass.GetFeatures();
 			List<User> list = new List<User>();
 
 			try
@@ -178,7 +94,7 @@ namespace DatabaseConnectorPostgres.Models
 				foreach(var entry in features)
 				{
 					DbFeature current = entry;
-					list.Add(User.Get(current));
+					list.Add(Get(current));
 				}
 			}
 			catch

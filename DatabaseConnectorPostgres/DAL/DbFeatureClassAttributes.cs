@@ -1,17 +1,20 @@
 ﻿
 using DatabaseConnectorPostgres.Exceptions;
+using Npgsql;
+using NpgsqlTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DatabaseConnectorPostgres.DAL
 {
 	public class DbFeatureClassAttributes : IEnumerable
 	{
 		private List<DbFeatureClassAttribute> _internalFeatureClassAttributeList;
-		private DbConnection _connection;
+		private NpgsqlConnection _connection;
 		private string _tableName;
 		public DbFeatureClassAttribute this[string attributeName]
 		{
@@ -40,11 +43,12 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public DbFeatureClassAttribute this[int index]
 		{
 			get
 			{
-				bool flag = index > checked(this.Count - 1);
+				bool flag = index > checked(Count - 1);
 				DbFeatureClassAttribute result;
 				if (flag)
 				{
@@ -52,22 +56,25 @@ namespace DatabaseConnectorPostgres.DAL
 				}
 				else
 				{
-					result = this._internalFeatureClassAttributeList[index];
+					result = _internalFeatureClassAttributeList[index];
 				}
 				return result;
 			}
 		}
+
 		public int Count
 		{
 			get
 			{
-				return this._internalFeatureClassAttributeList.Count;
+				return _internalFeatureClassAttributeList.Count;
 			}
 		}
+
 		public IEnumerator GetEnumerator()
 		{
-			return (IEnumerator)this._internalFeatureClassAttributeList.GetEnumerator();
+			return _internalFeatureClassAttributeList.GetEnumerator();
 		}
+
 		public string[] ToNameArray()
 		{
 			List<string> list = new List<string>();
@@ -85,85 +92,97 @@ namespace DatabaseConnectorPostgres.DAL
 			}
 			return list.ToArray();
 		}
-		public static DbFeatureClassAttributes GetFeatureClassAttributes(ref DbConnection refConnection, string tableName)
+
+		public static async Task<DbFeatureClassAttributes> GetFeatureClassAttributesAsync(NpgsqlConnection refConnection, string tableName)
 		{
-			return new DbFeatureClassAttributes(ref refConnection, tableName);
+			var dbFeartureAttributes = await BuildDbFeatureClassAttributesAsync(refConnection, tableName);
+			return dbFeartureAttributes;
 		}
-		public DbFeatureClassAttributes(ref DbConnection refConnection, string tableName)
+
+		async public static Task<DbFeatureClassAttributes> BuildDbFeatureClassAttributesAsync(NpgsqlConnection refConnection, string tableName)
 		{
-			this._internalFeatureClassAttributeList = new List<DbFeatureClassAttribute>();
-			this._connection = null;
-			this._tableName = "";
-			this._connection = refConnection;
-			this._tableName = tableName;
-			this.InitFeatureClassAttributeList();
+			DbFeatureClassAttributes dbFeatureClassAttributes = new DbFeatureClassAttributes(refConnection, tableName);
+			await dbFeatureClassAttributes.InitFeatureClassAttributeList();
+			return dbFeatureClassAttributes;
 		}
-		private void InitFeatureClassAttributeList()
+
+		public DbFeatureClassAttributes(NpgsqlConnection refConnection, string tableName)
 		{
-			this._internalFeatureClassAttributeList.Clear();
-			using (DbHelper.DbDataReader dbDataReader = new DbHelper.DbDataReader(ref this._connection, string.Format("SELECT table_catalog, column_name, data_type,CASE WHEN is_nullable = 'YES' THEN 0 ELSE 1 end As nullable from information_schema.columns where table_name = '{0}'", this._tableName)))
-			{
-				while (dbDataReader.Read())
-				{
-					DbFeatureClassAttribute item = new DbFeatureClassAttribute(dbDataReader.GetString(1), dbDataReader.GetString(2), dbDataReader.GetBoolean(3), 0L, 0L);
-					this._internalFeatureClassAttributeList.Add(item);
+			_internalFeatureClassAttributeList = new List<DbFeatureClassAttribute>();
+			_connection = null;
+			_tableName = "";
+			_connection = refConnection;
+			_tableName = tableName;
+		}
+
+		private async Task InitFeatureClassAttributeList()
+		{
+			await using (var cmd = new NpgsqlCommand(string.Format("SELECT table_catalog, column_name, data_type, CASE WHEN is_nullable = 'YES' THEN 0 ELSE 1 end As nullable from information_schema.columns where table_name = '{0}'", _tableName), _connection))
+			await using (var reader = await cmd.ExecuteReaderAsync())
+				while (await reader.ReadAsync())
+                {
+					DbFeatureClassAttribute item = new DbFeatureClassAttribute(reader.GetString(1), reader.GetString(2), reader.GetInt16(3), 0L, 0L);
+					_internalFeatureClassAttributeList.Add(item);
 				}
-			}
 		}
+
 		public DbFeatureClassAttribute CreateAttribute(string name, DbFeatureClassAttribute.DataTypes dataType, bool nullable, long length = 0L, long precision = 0L)
 		{
-			bool flag = length == 0L;
-			if (flag)
-			{
-				bool flag2 = dataType == DbFeatureClassAttribute.DataTypes.type_int;
-				if (flag2)
-				{
-					length = 10L;
-				}
-				else
-				{
-					bool flag3 = dataType == DbFeatureClassAttribute.DataTypes.type_nvarchar;
-					if (flag3)
-					{
-						length = 255L;
-					}
-					else
-					{
-						bool flag4 = dataType == DbFeatureClassAttribute.DataTypes.type_serial;
-						if (flag4)
-						{
-							length = 10L;
-						}
-					}
-				}
-			}
-			DbFeatureClassAttribute dbFeatureClassAttribute = new DbFeatureClassAttribute(name, dataType, nullable, length, precision);
-			string alterTableCreateColumnString = DbSqlStringBuilder.GetAlterTableCreateColumnString(this._tableName, dbFeatureClassAttribute);
-			bool flag5 = !DbHelper.DbSqlExecuter.Execute(_connection, alterTableCreateColumnString);
-			DbFeatureClassAttribute result;
-			if (flag5)
-			{
-				result = null;
-			}
-			else
-			{
-				this._internalFeatureClassAttributeList.Add(dbFeatureClassAttribute);
-				result = dbFeatureClassAttribute;
-			}
-			return result;
+			//bool flag = length == 0L;
+			//if (flag)
+			//{
+			//	bool flag2 = dataType == DbFeatureClassAttribute.DataTypes.type_int;
+			//	if (flag2)
+			//	{
+			//		length = 10L;
+			//	}
+			//	else
+			//	{
+			//		bool flag3 = dataType == DbFeatureClassAttribute.DataTypes.type_nvarchar;
+			//		if (flag3)
+			//		{
+			//			length = 255L;
+			//		}
+			//		else
+			//		{
+			//			bool flag4 = dataType == DbFeatureClassAttribute.DataTypes.type_serial;
+			//			if (flag4)
+			//			{
+			//				length = 10L;
+			//			}
+			//		}
+			//	}
+			//}
+			//DbFeatureClassAttribute dbFeatureClassAttribute = new DbFeatureClassAttribute(name, dataType, nullable, length, precision);
+			//string alterTableCreateColumnString = DbSqlStringBuilder.GetAlterTableCreateColumnString(_tableName, dbFeatureClassAttribute);
+			//bool flag5 = !DbHelper.DbSqlExecuter.Execute(_connection, alterTableCreateColumnString);
+			//DbFeatureClassAttribute result;
+			//if (flag5)
+			//{
+			//	result = null;
+			//}
+			//else
+			//{
+			//	_internalFeatureClassAttributeList.Add(dbFeatureClassAttribute);
+			//	result = dbFeatureClassAttribute;
+			//}
+			//return result;
+			return null;
 		}
+
 		public void DropAttribute(string attributeName)
 		{
-			this.DropAttribute(this[attributeName]);
+			DropAttribute(this[attributeName]);
 		}
+
 		public void DropAttribute(DbFeatureClassAttribute ftClassAttribute)
 		{
-			string alterTableDropColumnString = DbSqlStringBuilder.GetAlterTableDropColumnString(this._tableName, ftClassAttribute.Name);
-			bool flag = DbHelper.DbSqlExecuter.Execute(_connection, alterTableDropColumnString);
-			if (flag)
-			{
-				this._internalFeatureClassAttributeList.Remove(ftClassAttribute);
-			}
+			//string alterTableDropColumnString = DbSqlStringBuilder.GetAlterTableDropColumnString(_tableName, ftClassAttribute.Name);
+			//bool flag = DbHelper.DbSqlExecuter.Execute(_connection, alterTableDropColumnString);
+			//if (flag)
+			//{
+			//	_internalFeatureClassAttributeList.Remove(ftClassAttribute);
+			//}
 		}
 	}
 }

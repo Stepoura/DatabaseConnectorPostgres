@@ -11,26 +11,17 @@ namespace DatabaseConnectorPostgres.DAL
 {
 	public class DbSqlStringBuilder
 	{
-		private const string SqlSelect = "SELECT {0} FROM {1}";
-		private const string SqlWhere = " WHERE {0}";
-		private const string SqlOrder = " ORDER BY {0}";
-		private const string SqlDropTable = "DROP TABLE {0}";
-		private const string SqlCreateTable = "CREATE TABLE {0} ({1})";
-		private const string SqlAlterTable = "ALTER TABLE {0} ";
-		private const string SqlDropColumn = "DROP COLUMN {0} ";
-		private const string SqlAddColumn = "ADD COLUMN {0}";
-		private const string SqlDeleteRow = "DELETE FROM {0}";
-		private const string SqlInsertRow = "INSERT INTO {0} ({1}) VALUES ({2})";
-		private const string SqlUpdateRow = "UPDATE {0} SET {1}";
-		private const string SqlSelectLastIdInTable = "SELECT max(id) AS LastID FROM {0}";
+
 		private static string GetSqlElements(List<string> list)
 		{
 			return Strings.Join(list.ToArray(), ",");
 		}
+
 		public static string GetSelectLastIdString(string tableName)
 		{
 			return string.Format("SELECT max(id) AS LastID FROM {0}", tableName);
 		}
+
 		public static string GetUpdateRowString(string tableName, DbFeatureAttributes attributes, string where)
 		{
 			List<string> list = new List<string>();
@@ -57,6 +48,7 @@ namespace DatabaseConnectorPostgres.DAL
 			string str = string.Format("UPDATE {0} SET {1}", tableName, GetSqlElements(list));
 			return str + string.Format(" WHERE {0}", where);
 		}
+
 		public static string GetInsertRowString(string tableName, DbFeatureAttributes attributes)
 		{
 			List<string> list = new List<string>();

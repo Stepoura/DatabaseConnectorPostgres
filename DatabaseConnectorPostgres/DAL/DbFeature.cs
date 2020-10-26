@@ -12,11 +12,20 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			get
 			{
-				return Attributes["ID".ToLower()].ValueLong;
+                if (Attributes["ID".ToLower()] != null)
+                {
+					return Attributes["ID".ToLower()].ValueLong;
+				}
+                else
+                {
+					return 0L;
+                }			
 			}
 		}
+
 		public DbFeatureClass FeatureClass { get; }
 		public DbFeatureAttributes Attributes { get; }
+
 		public bool IsInserted
 		{
 			get
@@ -24,6 +33,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return ID > 0L;
 			}
 		}
+
 		public bool NeedsUpdate
 		{
 			get
@@ -51,6 +61,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public DbFeature(ref DbFeatureClass refFeatureClass, List<DbFeatureAttribute> valAttributeList)
 		{
 			FeatureClass = refFeatureClass;

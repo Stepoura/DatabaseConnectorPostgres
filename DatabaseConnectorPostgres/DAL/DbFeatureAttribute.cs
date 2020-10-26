@@ -91,7 +91,7 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			_needsUpdate = false;
 		}
-		public DbFeatureAttribute(ref DbFeatureClassAttribute refFeatureClassAttribute, object valValue) : base(refFeatureClassAttribute.Name, refFeatureClassAttribute.DataType, refFeatureClassAttribute.Nullable, 0L, 0L)
+		public DbFeatureAttribute(DbFeatureClassAttribute refFeatureClassAttribute, object valValue) : base(refFeatureClassAttribute.Name, refFeatureClassAttribute.DataType, refFeatureClassAttribute.Nullable, 0L, 0L)
 		{
 			_value = RuntimeHelpers.GetObjectValue(valValue);
 		}

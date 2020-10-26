@@ -1,4 +1,5 @@
 ﻿using DbEngDatabaseConnectorPostgresine.DAL;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -20,11 +21,13 @@ namespace DatabaseConnectorPostgres.DAL
 				return FeatureClass.Connection;
 			}
 		}
+
 		public DbFeature Feature
 		{
 			get;
 			set;
 		}
+
 		public DbFeatureClass FeatureClass
 		{
 			get
@@ -32,30 +35,36 @@ namespace DatabaseConnectorPostgres.DAL
 				return Feature.FeatureClass;
 			}
 		}
+
 		public long ID
 		{
 			get
 			{
-				return Feature.Attributes["ID".ToLower()].ValueLong;
+				if (Feature.Attributes["ID".ToLower()] != null)
+				{
+					return Feature.Attributes["ID".ToLower()].ValueLong;
+				}
+				else
+				{
+					return 0L;
+				}
 			}
 			set
 			{
 				Feature.Attributes["ID".ToLower()].Value = value;
 			}
 		}
-		protected DbFeatureItem(DbConnection connection, string tableName, long id)
-		{
-			DbFeatureClass dbFeatureClass = new DbFeatureClass(connection, tableName);
-			Feature = dbFeatureClass.GetFeature(id);
-		}
+
 		protected DbFeatureItem(DbFeature feature)
 		{
 			Feature = feature;
 		}
+
 		public void Delete()
 		{
 			FeatureClass.DeleteFeature(this.Feature);
 		}
+
 		public void Insert()
 		{
 			DbFeatureClass arg_10_0 = this.FeatureClass;
@@ -63,6 +72,7 @@ namespace DatabaseConnectorPostgres.DAL
 			arg_10_0.InsertFeature(ref feature);
 			Feature = feature;
 		}
+
 		public void Update()
 		{
 			DbFeatureClass arg_10_0 = this.FeatureClass;

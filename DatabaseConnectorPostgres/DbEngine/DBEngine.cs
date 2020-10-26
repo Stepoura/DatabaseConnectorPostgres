@@ -1,17 +1,23 @@
 ﻿using DatabaseConnectorPostgres.DAL;
+using DatabaseConnectorPostgres.Exceptions;
 using DbEngDatabaseConnectorPostgresine.DAL;
-using Devart.Data.PostgreSql;
+using log4net;
 using Microsoft.VisualBasic.CompilerServices;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DatabaseConnectorPostgres.DbEngine
 {
     public class DbEngine : IDisposable
     {
 
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string DatabaseName
         {
             get
@@ -20,94 +26,27 @@ namespace DatabaseConnectorPostgres.DbEngine
             }
         }
 
-        private static DbEngine _instance = null;
-        private DbFeatureClasses _featureClasses;
-        private bool _installComplete;
-        private DbFeature _SettingsFeature;
-        private bool disposedValue;
-
-        public static DbEngine Instance
+        private string UserId
         {
             get
             {
-                bool flag = _instance == null;
-                if (flag)
-                {
-                    _instance = new DbEngine();
-                }
-                return _instance;
+                return "postgres";
             }
         }
 
-        public DbFeature SettingsFeature
+        private string Password
         {
             get
             {
-                bool flag = _SettingsFeature == null || _SettingsFeature.Attributes == null;
-                if (flag)
-                {
-                    InitFeatureClasses();
-                    _SettingsFeature = FeatureClasses["settings"].GetFeature(1L);
-                }
-                return _SettingsFeature;
+                return "pg";
             }
         }
 
-        public long Version
+        private string Host
         {
             get
             {
-                long result;
-                try
-                {
-                    result = SettingsFeature.Attributes["db_version"].ValueLong;
-                }
-                catch (Exception expr_1F)
-                {
-                    ProjectData.SetProjectError(expr_1F);
-                    result = 0L;
-                    ProjectData.ClearProjectError();
-                }
-                return result;
-            }
-            private set
-            {
-                this.SettingsFeature.Attributes["db_version"].Value = value;
-                DbFeatureClass arg_36_0 = SettingsFeature.FeatureClass;
-                DbFeature settingsFeature = SettingsFeature;
-                arg_36_0.UpdateFeature(ref settingsFeature);
-            }
-        }
-
-        private DbEngine()
-        {
-            _featureClasses = null;
-            _installComplete = false;
-            _SettingsFeature = null;
-            ConnectToDatabase();
-            Install();
-        }
-
-        public DbConnection Connection
-        {
-            get
-            {
-                PgSqlConnection pgSqlConnection = new PgSqlConnection(this.ConnectionString);
-                pgSqlConnection.UserId = "postgres";
-                pgSqlConnection.Password = "pg";
-                pgSqlConnection.Host = "localhost";
-                pgSqlConnection.Database = DatabaseName;
-                pgSqlConnection.Unicode = true;
-                return pgSqlConnection;
-
-            }
-        }
-
-        private string ConnectionString
-        {
-            get
-            {
-                return string.Format("Default Command Timeout=0;Force IPv4=true", new object[0]);
+                return "Localhost";
             }
         }
 
@@ -126,11 +65,107 @@ namespace DatabaseConnectorPostgres.DbEngine
             }
         }
 
-        private void ConnectToDatabase()
+        private static DbEngine _instance = null;
+        private DbFeatureClasses _featureClasses;
+        private bool _installComplete;
+        private DbFeature _SettingsFeature;
+        private bool disposedValue;
+        private NpgsqlConnection _connection;
+
+        public static async Task<DbEngine> Instance()
         {
-            Connection.Open();
-            InitFeatureClasses();
-            bool flag = this._featureClasses != null && _featureClasses.Count > 0;
+            bool flag = _instance == null;
+            if (flag)
+            {
+                _instance = await BuildDbEngineAsync();
+            }
+            return _instance;
+        }
+
+        public async Task<DbFeature> SettingsFeature()
+        {
+            bool flag = _SettingsFeature == null || _SettingsFeature.Attributes == null;
+            if (flag)
+            {
+                await InitFeatureClassesAsync();
+                _SettingsFeature = await FeatureClasses["settings"].GetFeature(1L);
+            }
+            return _SettingsFeature;
+        }
+
+        public long Version
+        {
+            //todo
+            get
+            {
+                long result;
+                try
+                {
+                    result = _SettingsFeature.Attributes["db_version"].ValueLong;
+                }
+                catch (Exception expr_1F)
+                {
+                    ProjectData.SetProjectError(expr_1F);
+                    result = 0L;
+                    ProjectData.ClearProjectError();
+                }
+                return result;
+            }
+            private set
+            {
+                _SettingsFeature.Attributes["db_version"].Value = value;
+                DbFeatureClass arg_36_0 = _SettingsFeature.FeatureClass;
+                DbFeature settingsFeature = _SettingsFeature;
+                arg_36_0.UpdateFeature(ref settingsFeature);
+            }
+        }
+
+        async public static Task<DbEngine> BuildDbEngineAsync()
+        {
+            DbEngine engine = new DbEngine();
+            await engine.ConnectToDatabase();
+            await engine.Install();
+            return engine;
+        }
+
+        private DbEngine()
+        {
+            _featureClasses = null;
+            _installComplete = false;
+            _SettingsFeature = null;
+        }
+
+        private string GetConnectionString()
+        {
+            StringBuilder dbConnectionString = new StringBuilder();
+            dbConnectionString.Append("Host=" + Host + ";");
+            dbConnectionString.Append("Username=" + UserId + ";");
+            dbConnectionString.Append("Password=" + Password + ";");
+            dbConnectionString.Append("Database=" + DatabaseName + ";");
+            return dbConnectionString.ToString();
+        }
+
+
+        public NpgsqlConnection Connection
+        {
+            get
+            {
+                bool flag = _connection == null;
+                if (flag)
+                {
+                    string connString = GetConnectionString();
+                    _connection = new NpgsqlConnection(connString);
+                }
+                return _connection;
+            }
+        }
+
+        private async Task ConnectToDatabase()
+        {
+            var conn = Connection;
+            await conn.OpenAsync();
+            await InitFeatureClassesAsync();
+            bool flag = _featureClasses != null && _featureClasses.Count > 0;
             if (flag)
             {
                 _installComplete = true;
@@ -139,34 +174,35 @@ namespace DatabaseConnectorPostgres.DbEngine
             {
                 RunDatabaseUpdate();
                 Reload();
-                Connection.Close();
-                Connection.Dispose();
+                await conn.CloseAsync();
+                await conn.DisposeAsync();
                 _installComplete = true;
             }
         }
 
-        private void InitFeatureClasses()
+        private async Task InitFeatureClassesAsync()
         {
-            DbConnection connection = this.Connection;
-            this._featureClasses = DbFeatureClasses.GetFeatureClasses(ref connection);
+            DbConnection connection = Connection;
+            _featureClasses = await DbFeatureClasses.GetFeatureClasses(Connection);
         }
 
-        public void Install()
+        public async Task Install()
         {
             bool installComplete = this.InstallComplete;
             if (!installComplete)
             {
-                this.Connection.Open();
-                this.InitFeatureClasses();
-                DbFeatureClass dbFeatureClass = this.FeatureClasses.CreateFeatureClass("settings");
+                var conn = Connection;
+                await conn.OpenAsync();
+                await InitFeatureClassesAsync();
+                DbFeatureClass dbFeatureClass = FeatureClasses.CreateFeatureClass("settings");
                 dbFeatureClass.Attributes.CreateAttribute("db_version", DbFeatureClassAttribute.DataTypes.type_int, true, 0L, 0L);
                 DbFeature dbFeature = dbFeatureClass.CreateFeature();
                 dbFeature.Attributes["db_version"].Value = 0;
                 dbFeatureClass.InsertFeature(ref dbFeature);
-                this.RunDatabaseUpdate();
-                this.Reload();
-                this.Connection.Close();
-                this.Connection.Dispose();
+                RunDatabaseUpdate();
+                Reload();
+                await conn.CloseAsync();
+                await conn.DisposeAsync();
             }
         }
 
@@ -182,9 +218,9 @@ namespace DatabaseConnectorPostgres.DbEngine
             _SettingsFeature = null;
         }
 
-        public void Refresh()
+        public async Task Refresh()
         {
-            InitFeatureClasses();
+            await InitFeatureClassesAsync();
         }
 
         public void Dispose()

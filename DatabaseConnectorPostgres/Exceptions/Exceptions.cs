@@ -12,6 +12,13 @@ namespace DatabaseConnectorPostgres.Exceptions
 		}
 	}
 
+	public class DbConnectionExcetion : Exception
+	{
+		public DbConnectionExcetion() : base("Connection Exception")
+		{
+		}
+	}
+
 	public class GetUpdateRowStringException : Exception
 	{
 		public GetUpdateRowStringException() : base("Update Row String Exception")

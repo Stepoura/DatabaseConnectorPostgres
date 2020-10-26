@@ -1,16 +1,18 @@
 ﻿using DatabaseConnectorPostgres.Exceptions;
 using DbEngDatabaseConnectorPostgresine.DAL;
+using Npgsql;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DatabaseConnectorPostgres.DAL
 {
 	public class DbFeatureClasses : IEnumerable
 	{
 		private List<DbFeatureClass> _internalFeatureClassList;
-		private DbConnection _connection;
+		private NpgsqlConnection _connection;
 		public DbFeatureClass this[string featureClassName]
 		{
 			get
@@ -38,6 +40,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public DbFeatureClass this[int index]
 		{
 			get
@@ -62,53 +65,65 @@ namespace DatabaseConnectorPostgres.DAL
 				return this._internalFeatureClassList.Count;
 			}
 		}
+
 		public IEnumerator GetEnumerator()
 		{
 			return (IEnumerator)this._internalFeatureClassList.GetEnumerator();
 		}
-		public static DbFeatureClasses GetFeatureClasses(ref DbConnection refConnection)
+
+		public static async Task<DbFeatureClasses> GetFeatureClasses(NpgsqlConnection refConnection)
 		{
-			return new DbFeatureClasses(ref refConnection);
+			var dbFeatureClasses = await BuildDbFeatureClassesAsync(refConnection);
+			return dbFeatureClasses;
 		}
-		public DbFeatureClasses(ref DbConnection refConnection)
+
+		async public static Task<DbFeatureClasses> BuildDbFeatureClassesAsync(NpgsqlConnection refConnection)
 		{
-			this._internalFeatureClassList = new List<DbFeatureClass>();
-			this._connection = null;
-			this._connection = refConnection;
-			this.InitFeatureClassList();
+			DbFeatureClasses dbDbFeatureClasses = new DbFeatureClasses(refConnection);
+			await dbDbFeatureClasses.InitFeatureClassListAsync();
+			return dbDbFeatureClasses;
 		}
-		private void InitFeatureClassList()
+
+		public DbFeatureClasses(NpgsqlConnection refConnection)
 		{
-			this._internalFeatureClassList.Clear();
-			string selectString = DbSqlStringBuilder.GetSelectString("information_schema.tables", new string[]
-			{
-				"table_name"
-			}, "table_schema = 'public' and table_type = 'BASE TABLE' ORDER BY table_schema,table_name", "");
-			using (DbHelper.DbDataReader dbDataReader = new DbHelper.DbDataReader(ref this._connection, selectString))
-			{
-				while (dbDataReader.Read())
+			_internalFeatureClassList = new List<DbFeatureClass>();
+			_connection = null;
+			_connection = refConnection;
+		}
+
+		private async Task InitFeatureClassListAsync()
+		{
+            _internalFeatureClassList.Clear();
+            string selectString = DbSqlStringBuilder.GetSelectString("information_schema.tables", new string[]
+            {
+                "table_name"
+            }, "table_schema = 'public' and table_type = 'BASE TABLE' ORDER BY table_schema,table_name", "");
+
+			await using (var cmd = new NpgsqlCommand(selectString, _connection))
+			await using (var reader = await cmd.ExecuteReaderAsync())
+				while (await reader.ReadAsync())
 				{
-					DbFeatureClass item = new DbFeatureClass(this._connection, dbDataReader.GetString(0));
-					this._internalFeatureClassList.Add(item);
+					DbFeatureClass item = new DbFeatureClass(_connection, reader.GetString(0));
+					_internalFeatureClassList.Add(item);
 				}
-			}
-		}
+        }
 		public DbFeatureClass CreateFeatureClass(string featureClassName)
 		{
-			string createTableString = DbSqlStringBuilder.GetCreateTableString(featureClassName, new DbFeatureClassAttribute("ID".ToLower(), DbFeatureClassAttribute.DataTypes.type_serial, false, 0L, 0L));
-			bool flag = !DbHelper.DbSqlExecuter.Execute(this._connection, createTableString);
-			DbFeatureClass result;
-			if (flag)
-			{
-				result = null;
-			}
-			else
-			{
-				DbFeatureClass dbFeatureClass = new DbFeatureClass(this._connection, featureClassName);
-				this._internalFeatureClassList.Add(dbFeatureClass);
-				result = dbFeatureClass;
-			}
-			return result;
+			//string createTableString = DbSqlStringBuilder.GetCreateTableString(featureClassName, new DbFeatureClassAttribute("ID".ToLower(), DbFeatureClassAttribute.DataTypes.type_serial, false, 0L, 0L));
+			//bool flag = !DbHelper.DbSqlExecuter.Execute(this._connection, createTableString);
+			//DbFeatureClass result;
+			//if (flag)
+			//{
+			//	result = null;
+			//}
+			//else
+			//{
+			//	DbFeatureClass dbFeatureClass = new DbFeatureClass(this._connection, featureClassName);
+			//	this._internalFeatureClassList.Add(dbFeatureClass);
+			//	result = dbFeatureClass;
+			//}
+			//return result;
+			return null;
 		}
 		public void DropFeatureClass(string featureClassName)
 		{
@@ -116,12 +131,12 @@ namespace DatabaseConnectorPostgres.DAL
 		}
 		public void DropFeatureClass(DbFeatureClass ftClass)
 		{
-			string dropTableString = DbSqlStringBuilder.GetDropTableString(ftClass.Name);
-			bool flag = DbHelper.DbSqlExecuter.Execute(this._connection, dropTableString);
-			if (flag)
-			{
-				this._internalFeatureClassList.Remove(ftClass);
-			}
+			//string dropTableString = DbSqlStringBuilder.GetDropTableString(ftClass.Name);
+			//bool flag = DbHelper.DbSqlExecuter.Execute(this._connection, dropTableString);
+			//if (flag)
+			//{
+			//	this._internalFeatureClassList.Remove(ftClass);
+			//}
 		}
 	}
 }
