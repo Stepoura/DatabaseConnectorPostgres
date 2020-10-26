@@ -5,7 +5,7 @@ namespace DatabaseConnectorPostgres.DbEngine
     internal class DbStructureUpdater
     {
         private DbEngine _dbEngine;
-        public DbStructureUpdater(ref DbEngine refDbEngine)
+        public DbStructureUpdater(DbEngine refDbEngine)
         {
             _dbEngine = null;
             _dbEngine = refDbEngine;
@@ -14,12 +14,12 @@ namespace DatabaseConnectorPostgres.DbEngine
 
         internal void Run()
         {
-            this.CreateVersion_1();
+            CreateVersion_1();
         }
 
         private void CreateVersion_1()
         {
-            bool flag = this._dbEngine.Version > 0L;
+            bool flag = _dbEngine.Version > 0L;
         }
     }
 }

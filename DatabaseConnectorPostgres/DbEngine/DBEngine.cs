@@ -116,7 +116,7 @@ namespace DatabaseConnectorPostgres.DbEngine
                 _SettingsFeature.Attributes["db_version"].Value = value;
                 DbFeatureClass arg_36_0 = _SettingsFeature.FeatureClass;
                 DbFeature settingsFeature = _SettingsFeature;
-                arg_36_0.UpdateFeature(ref settingsFeature);
+                arg_36_0.UpdateFeature(settingsFeature);
             }
         }
 
@@ -188,7 +188,7 @@ namespace DatabaseConnectorPostgres.DbEngine
 
         public async Task Install()
         {
-            bool installComplete = this.InstallComplete;
+            bool installComplete = InstallComplete;
             if (!installComplete)
             {
                 var conn = Connection;
@@ -198,7 +198,7 @@ namespace DatabaseConnectorPostgres.DbEngine
                 dbFeatureClass.Attributes.CreateAttribute("db_version", DbFeatureClassAttribute.DataTypes.type_int, true, 0L, 0L);
                 DbFeature dbFeature = dbFeatureClass.CreateFeature();
                 dbFeature.Attributes["db_version"].Value = 0;
-                dbFeatureClass.InsertFeature(ref dbFeature);
+                dbFeatureClass.InsertFeature(dbFeature);
                 RunDatabaseUpdate();
                 Reload();
                 await conn.CloseAsync();
@@ -209,7 +209,7 @@ namespace DatabaseConnectorPostgres.DbEngine
         private void RunDatabaseUpdate()
         {
             DbEngine dbEngine = this;
-            DbStructureUpdater dbStructureUpdater = new DbStructureUpdater(ref dbEngine);
+            DbStructureUpdater dbStructureUpdater = new DbStructureUpdater(dbEngine);
             dbStructureUpdater.Run();
         }
 

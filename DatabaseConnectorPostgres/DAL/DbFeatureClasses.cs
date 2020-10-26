@@ -45,7 +45,7 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			get
 			{
-				bool flag = index > checked(this.Count - 1);
+				bool flag = index > checked(Count - 1);
 				DbFeatureClass result;
 				if (flag)
 				{
@@ -53,7 +53,7 @@ namespace DatabaseConnectorPostgres.DAL
 				}
 				else
 				{
-					result = this._internalFeatureClassList[index];
+					result = _internalFeatureClassList[index];
 				}
 				return result;
 			}
@@ -62,13 +62,13 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			get
 			{
-				return this._internalFeatureClassList.Count;
+				return _internalFeatureClassList.Count;
 			}
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return (IEnumerator)this._internalFeatureClassList.GetEnumerator();
+			return _internalFeatureClassList.GetEnumerator();
 		}
 
 		public static async Task<DbFeatureClasses> GetFeatureClasses(NpgsqlConnection refConnection)
@@ -127,7 +127,7 @@ namespace DatabaseConnectorPostgres.DAL
 		}
 		public void DropFeatureClass(string featureClassName)
 		{
-			this.DropFeatureClass(this[featureClassName]);
+			DropFeatureClass(this[featureClassName]);
 		}
 		public void DropFeatureClass(DbFeatureClass ftClass)
 		{

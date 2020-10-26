@@ -62,22 +62,22 @@ namespace DatabaseConnectorPostgres.DAL
 
 		public void Delete()
 		{
-			FeatureClass.DeleteFeature(this.Feature);
+			FeatureClass.DeleteFeature(Feature);
 		}
 
 		public void Insert()
 		{
-			DbFeatureClass arg_10_0 = this.FeatureClass;
-			DbFeature feature = this.Feature;
-			arg_10_0.InsertFeature(ref feature);
+			DbFeatureClass arg_10_0 = FeatureClass;
+			DbFeature feature = Feature;
+			arg_10_0.InsertFeature(feature);
 			Feature = feature;
 		}
 
 		public void Update()
 		{
-			DbFeatureClass arg_10_0 = this.FeatureClass;
-			DbFeature feature = this.Feature;
-			arg_10_0.UpdateFeature(ref feature);
+			DbFeatureClass arg_10_0 = FeatureClass;
+			DbFeature feature = Feature;
+			arg_10_0.UpdateFeature(feature);
 			Feature = feature;
 		}
 	}

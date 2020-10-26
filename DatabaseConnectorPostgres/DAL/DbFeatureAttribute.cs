@@ -28,7 +28,7 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			get
 			{
-				return this._value;
+				return _value;
 			}
 			set
 			{
@@ -91,6 +91,7 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			_needsUpdate = false;
 		}
+
 		public DbFeatureAttribute(DbFeatureClassAttribute refFeatureClassAttribute, object valValue) : base(refFeatureClassAttribute.Name, refFeatureClassAttribute.DataType, refFeatureClassAttribute.Nullable, 0L, 0L)
 		{
 			_value = RuntimeHelpers.GetObjectValue(valValue);

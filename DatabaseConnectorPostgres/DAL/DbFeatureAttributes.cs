@@ -41,7 +41,7 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			get
 			{
-				bool flag = index > checked(this.Count - 1);
+				bool flag = index > checked(Count - 1);
 				DbFeatureAttribute result;
 				if (flag)
 				{
@@ -49,7 +49,7 @@ namespace DatabaseConnectorPostgres.DAL
 				}
 				else
 				{
-					result = this._internalFeatureAttributeList[index];
+					result = _internalFeatureAttributeList[index];
 				}
 				return result;
 			}
@@ -58,16 +58,16 @@ namespace DatabaseConnectorPostgres.DAL
 		{
 			get
 			{
-				return this._internalFeatureAttributeList.Count;
+				return _internalFeatureAttributeList.Count;
 			}
 		}
 		public IEnumerator GetEnumerator()
 		{
-			return (IEnumerator)this._internalFeatureAttributeList.GetEnumerator();
+			return _internalFeatureAttributeList.GetEnumerator();
 		}
 		public DbFeatureAttributes(List<DbFeatureAttribute> valAttributeList)
 		{
-			this._internalFeatureAttributeList = valAttributeList;
+			_internalFeatureAttributeList = valAttributeList;
 		}
 	}
 }

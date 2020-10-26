@@ -82,7 +82,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 
 					try
 					{
-						IEnumerator enumerator = this.Attributes.GetEnumerator();
+						IEnumerator enumerator = Attributes.GetEnumerator();
 						while (enumerator.MoveNext())
 						{
 							DbFeatureClassAttribute dbFeatureClassAttribute = (DbFeatureClassAttribute)enumerator.Current;
@@ -99,7 +99,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 					}
 					List<DbFeature> arg_B0_0 = list;
 					DbFeatureClass dbFeatureClass = this;
-					arg_B0_0.Add(new DbFeature(ref dbFeatureClass, list2));
+					arg_B0_0.Add(new DbFeature(dbFeatureClass, list2));
 				}
             return list;
 		}
@@ -107,11 +107,11 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 		{
 			//todo
 			return 0;
-			//string selectString = DbSqlStringBuilder.GetSelectString(this.Name, new string[]
+			//string selectString = DbSqlStringBuilder.GetSelectString(Name, new string[]
 			//{
 			//	"count(id)"
 			//}, "", "");
-			//return DbHelper.DbSqlReader.GetLong(this._connection, selectString);
+			//return DbHelper.DbSqlReader.GetLong(_connection, selectString);
 		}
 		public DbFeature CreateFeature()
 		{
@@ -132,9 +132,9 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			}
 
 			DbFeatureClass dbFeatureClass = this;
-			return new DbFeature(ref dbFeatureClass, list);
+			return new DbFeature(dbFeatureClass, list);
 		}
-		public void InsertFeature(ref DbFeature feature)
+		public void InsertFeature(DbFeature feature)
 		{
 			//bool flag = !feature.IsInserted;
 			//if (flag)
@@ -149,7 +149,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			//	if (flag3)
 			//	{
 			//		string selectLastIdString = DbSqlStringBuilder.GetSelectLastIdString(this.Name);
-			//		feature.Attributes["ID".ToLower()].Value = DbHelper.DbSqlReader.GetLong(ref this._connection, selectLastIdString);
+			//		feature.Attributes["ID".ToLower()].Value = DbHelper.DbSqlReader.GetLong(this._connection, selectLastIdString);
 			//		try
 			//		{
 			//			IEnumerator enumerator = feature.Attributes.GetEnumerator();
@@ -183,7 +183,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 					while (enumerator.MoveNext())
 					{
 						DbFeature current = enumerator.Current;
-						this.InsertFeature(ref current);
+						InsertFeature(current);
 					}
 				}
 				catch
@@ -192,7 +192,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 				}
 			}
 		}
-		public void UpdateFeature(ref DbFeature feature)
+		public void UpdateFeature(DbFeature feature)
 		{
 			//bool flag = feature.IsInserted && feature.NeedsUpdate;
 			//if (flag)
@@ -232,7 +232,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 					while (enumerator.MoveNext())
 					{
 						DbFeature current = enumerator.Current;
-						this.UpdateFeature(ref current);
+						UpdateFeature(current);
 					}
 				}
 				catch
@@ -246,8 +246,8 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			//bool isInserted = feature.IsInserted;
 			//if (isInserted)
 			//{
-			//	string deleteRowString = DbSqlStringBuilder.GetDeleteRowString(this.Name, string.Format("id = {0}", feature.ID));
-			//	DbHelper.DbSqlExecuter.Execute(this._connection, deleteRowString);
+			//	string deleteRowString = DbSqlStringBuilder.GetDeleteRowString(Name, string.Format("id = {0}", feature.ID));
+			//	DbHelper.DbSqlExecuter.Execute(_connection, deleteRowString);
 			//}
 		}
 		public void DeleteFeatures(List<DbFeature> features)
@@ -262,7 +262,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 					while (enumerator.MoveNext())
 					{
 						DbFeature current = enumerator.Current;
-						this.DeleteFeature(current);
+						DeleteFeature(current);
 					}
 				}
 				catch
