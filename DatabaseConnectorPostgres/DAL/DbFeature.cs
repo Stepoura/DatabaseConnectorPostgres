@@ -67,18 +67,21 @@ namespace DatabaseConnectorPostgres.DAL
 			FeatureClass = refFeatureClass;
 			Attributes = new DbFeatureAttributes(valAttributeList);
 		}
+
 		public void Insert()
 		{
 			DbFeatureClass arg_0B_0 = FeatureClass;
 			DbFeature dbFeature = this;
 			arg_0B_0.InsertFeature(dbFeature);
 		}
+
 		public void Update()
 		{
 			DbFeatureClass arg_0B_0 = FeatureClass;
 			DbFeature dbFeature = this;
 			arg_0B_0.UpdateFeature(dbFeature);
 		}
+
 		public void Delete()
 		{
 			FeatureClass.DeleteFeature(this);

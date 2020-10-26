@@ -42,6 +42,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			_connection = refConnection;
 			Name = valName;
 		}
+
 		private async Task InitFeatureClassAsync()
 		{
 			await InitAttribbutesAsync();
@@ -103,6 +104,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 				}
             return list;
 		}
+
 		public long GetFeaturesCount()
 		{
 			//todo
@@ -113,6 +115,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			//}, "", "");
 			//return DbHelper.DbSqlReader.GetLong(_connection, selectString);
 		}
+
 		public DbFeature CreateFeature()
 		{
 			List<DbFeatureAttribute> list = new List<DbFeatureAttribute>();
@@ -134,6 +137,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			DbFeatureClass dbFeatureClass = this;
 			return new DbFeature(dbFeatureClass, list);
 		}
+
 		public void InsertFeature(DbFeature feature)
 		{
 			//bool flag = !feature.IsInserted;
@@ -172,6 +176,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			//	this._connection.Close();
 			//}
 		}
+
 		public void InsertFeatures(List<DbFeature> features)
 		{
 			bool flag = features != null;
@@ -192,6 +197,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 				}
 			}
 		}
+
 		public void UpdateFeature(DbFeature feature)
 		{
 			//bool flag = feature.IsInserted && feature.NeedsUpdate;
@@ -221,6 +227,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			//	}
 			//}
 		}
+
 		public void UpdateFeatures(List<DbFeature> features)
 		{
 			bool flag = features != null;
@@ -241,6 +248,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 				}
 			}
 		}
+
 		public void DeleteFeature(DbFeature feature)
 		{
 			//bool isInserted = feature.IsInserted;
@@ -250,6 +258,7 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 			//	DbHelper.DbSqlExecuter.Execute(_connection, deleteRowString);
 			//}
 		}
+
 		public void DeleteFeatures(List<DbFeature> features)
 		{
 			bool flag = features != null;

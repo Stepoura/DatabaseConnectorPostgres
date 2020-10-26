@@ -11,7 +11,6 @@ namespace DatabaseConnectorPostgres.DAL
 {
 	public class DbSqlStringBuilder
 	{
-
 		private static string GetSqlElements(List<string> list)
 		{
 			return Strings.Join(list.ToArray(), ",");

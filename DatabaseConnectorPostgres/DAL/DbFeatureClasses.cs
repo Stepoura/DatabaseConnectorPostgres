@@ -107,6 +107,7 @@ namespace DatabaseConnectorPostgres.DAL
 					_internalFeatureClassList.Add(item);
 				}
         }
+
 		public DbFeatureClass CreateFeatureClass(string featureClassName)
 		{
 			//string createTableString = DbSqlStringBuilder.GetCreateTableString(featureClassName, new DbFeatureClassAttribute("ID".ToLower(), DbFeatureClassAttribute.DataTypes.type_serial, false, 0L, 0L));
@@ -125,10 +126,12 @@ namespace DatabaseConnectorPostgres.DAL
 			//return result;
 			return null;
 		}
+
 		public void DropFeatureClass(string featureClassName)
 		{
 			DropFeatureClass(this[featureClassName]);
 		}
+
 		public void DropFeatureClass(DbFeatureClass ftClass)
 		{
 			//string dropTableString = DbSqlStringBuilder.GetDropTableString(ftClass.Name);

@@ -1,6 +1,5 @@
 ﻿
 using DatabaseConnectorPostgres.DAL;
-using DatabaseConnectorPostgres.Enum;
 using DatabaseConnectorPostgres.Exceptions;
 using DatabaseConnectorPostgres.Hashing;
 using DbEngDatabaseConnectorPostgresine.DAL;

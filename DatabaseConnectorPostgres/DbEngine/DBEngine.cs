@@ -69,7 +69,6 @@ namespace DatabaseConnectorPostgres.DbEngine
         private DbFeatureClasses _featureClasses;
         private bool _installComplete;
         private DbFeature _SettingsFeature;
-        private bool disposedValue;
         private NpgsqlConnection _connection;
 
         public static async Task<DbEngine> Instance()
@@ -145,7 +144,6 @@ namespace DatabaseConnectorPostgres.DbEngine
             return dbConnectionString.ToString();
         }
 
-
         public NpgsqlConnection Connection
         {
             get
@@ -182,7 +180,6 @@ namespace DatabaseConnectorPostgres.DbEngine
 
         private async Task InitFeatureClassesAsync()
         {
-            DbConnection connection = Connection;
             _featureClasses = await DbFeatureClasses.GetFeatureClasses(Connection);
         }
 

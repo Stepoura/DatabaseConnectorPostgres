@@ -37,6 +37,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public DbFeatureAttribute this[int index]
 		{
 			get
@@ -54,6 +55,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public int Count
 		{
 			get
@@ -61,10 +63,12 @@ namespace DatabaseConnectorPostgres.DAL
 				return _internalFeatureAttributeList.Count;
 			}
 		}
+
 		public IEnumerator GetEnumerator()
 		{
 			return _internalFeatureAttributeList.GetEnumerator();
 		}
+
 		public DbFeatureAttributes(List<DbFeatureAttribute> valAttributeList)
 		{
 			_internalFeatureAttributeList = valAttributeList;

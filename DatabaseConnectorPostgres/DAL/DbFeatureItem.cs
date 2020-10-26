@@ -12,9 +12,7 @@ namespace DatabaseConnectorPostgres.DAL
 	[Serializable]
 	public abstract class DbFeatureItem
 	{
-		[DebuggerBrowsable(DebuggerBrowsableState.Never), CompilerGenerated]
-		private DbFeature _Feature;
-		public DbConnection Connection
+		public NpgsqlConnection Connection
 		{
 			get
 			{

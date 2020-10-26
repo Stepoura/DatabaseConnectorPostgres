@@ -1,5 +1,4 @@
 ﻿using DatabaseConnectorPostgres.DbEngine;
-using DatabaseConnectorPostgres.Enum;
 using DatabaseConnectorPostgres.Models;
 using System;
 using System.Collections.Generic;
@@ -14,13 +13,10 @@ namespace DbTest
         [STAThread]
         static async Task Main(string[] args)
         {
-            for(int i = 0; i < 10; i++)
-            {
-                await ListAllUserAsync();
-            }
+            await ListAllUserAsync();
         }
 
-    
+
         private static async Task ListAllUserAsync()
         {
             using (var db = await DbEngine.Instance())

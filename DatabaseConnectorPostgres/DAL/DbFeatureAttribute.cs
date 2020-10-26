@@ -17,6 +17,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return Value.GetType();
 			}
 		}
+
 		public bool NeedsUpdate
 		{
 			get
@@ -24,6 +25,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return _needsUpdate;
 			}
 		}
+
 		public object Value
 		{
 			get
@@ -36,6 +38,7 @@ namespace DatabaseConnectorPostgres.DAL
 				_needsUpdate = true;
 			}
 		}
+
 		public long ValueLong
 		{
 			get
@@ -53,6 +56,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public int ValueInt
 		{
 			get
@@ -70,6 +74,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public string ValueString
 		{
 			get
@@ -87,6 +92,7 @@ namespace DatabaseConnectorPostgres.DAL
 				return result;
 			}
 		}
+
 		public void UpdatedExecuted()
 		{
 			_needsUpdate = false;
