@@ -81,6 +81,46 @@ namespace DatabaseConnectorPostgres.Models
 			return result;
 		}
 
+		public static async Task<KeyValuePair<EnumUser, User>> Get(NpgsqlConnection connection, string username)
+		{
+			DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
+			List<DbFeature> features = await dbFeatureClass.GetFeatures(string.Format("username = '{0}'", username), "");
+			int count = features.Count;
+			if (count == 0)
+			{
+				return new KeyValuePair<EnumUser, User>(EnumUser.USER_NOT_FOUND, null);
+			}
+			if (count != 1)
+			{
+				return new KeyValuePair<EnumUser, User>(EnumUser.MULTIPLE_USER_FOUND, null);
+			}
+
+			return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, new User(features[0]));
+		}
+
+		public static async Task<KeyValuePair<EnumUser, User>> Get(NpgsqlConnection connection, string username, string password)
+		{
+			DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
+			List<DbFeature> features = await dbFeatureClass.GetFeatures(string.Format("username = '{0}'", username), "");
+			int count = features.Count;
+			if (count == 0)
+			{
+				return new KeyValuePair<EnumUser, User>(EnumUser.USER_NOT_FOUND, null);
+			}
+			if (count != 1)
+			{
+				return new KeyValuePair<EnumUser, User>(EnumUser.MULTIPLE_USER_FOUND, null);
+			}
+			User user = new User(features[0]);
+			HashingService hashingService = new HashingService();
+			bool flag = hashingService.ValidatePasswordHash(password, user.Password);
+			if (!flag)
+			{
+				return new KeyValuePair<EnumUser, User>(EnumUser.WRONG_PASSWORD, null);
+			}
+			return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, user);
+		}
+
 		public static async Task<IList<User>> GetAll(NpgsqlConnection connection)
 		{
 
@@ -101,6 +141,16 @@ namespace DatabaseConnectorPostgres.Models
 				throw new GetAllUserException();
 			}
 			return list;
+		}
+
+		public enum EnumUser
+		{
+			SUCCESS,
+			USER_EXISTS,
+			FAILED,
+			USER_NOT_FOUND,
+			MULTIPLE_USER_FOUND,
+			WRONG_PASSWORD
 		}
 
 	}

@@ -87,9 +87,6 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 						while (enumerator.MoveNext())
 						{
 							DbFeatureClassAttribute dbFeatureClassAttribute = (DbFeatureClassAttribute)enumerator.Current;
-
-							var x = dbFeatureClassAttribute.Name;
-
 							DbFeatureAttribute item = new DbFeatureAttribute(dbFeatureClassAttribute, reader.GetValue(dbFeatureClassAttribute.Name));
 							list2.Add(item);
 						}

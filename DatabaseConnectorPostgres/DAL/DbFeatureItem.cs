@@ -6,11 +6,12 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DatabaseConnectorPostgres.DAL
 {
 	[Serializable]
-	public abstract class DbFeatureItem
+	public class DbFeatureItem
 	{
 		public NpgsqlConnection Connection
 		{
@@ -53,7 +54,7 @@ namespace DatabaseConnectorPostgres.DAL
 			}
 		}
 
-		protected DbFeatureItem(DbFeature feature)
+		public DbFeatureItem(DbFeature feature)
 		{
 			Feature = feature;
 		}

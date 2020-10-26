@@ -10,10 +10,12 @@ namespace DbTest
 {
     class Program
     {
+        private static readonly string name = "nils";
+
         [STAThread]
         static async Task Main(string[] args)
         {
-            await ListAllUserAsync();
+            await GetUser();
         }
 
 
@@ -37,6 +39,22 @@ namespace DbTest
             }
         }
 
+        private static async Task GetUser()
+        {
+            using (var db = await DbEngine.Instance())
+            {
+                var user = await User.Get(db.Connection, name);
+                if(user.Key == User.EnumUser.SUCCESS)
+                {
+                    Console.WriteLine("User: " + user.Value.UserName + "(Id: " + user.Value.ID + ")" + ", is Admin: " + user.Value.IsAdmin.ToString());
+                }
+                else
+                {
+                    Console.WriteLine(user.Key.ToString());
+                }
+                
+            }
+        }
 
         private static string SecureStringToString(SecureString value)
         {
