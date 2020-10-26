@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace DatabaseConnectorPostgres.DbEngine
 {
-    public class DbEngine : IDisposable
+    public class DbEngine: IDisposable
     {
 
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -225,9 +225,7 @@ namespace DatabaseConnectorPostgres.DbEngine
 
         public void Dispose()
         {
-            Dispose();
             GC.SuppressFinalize(this);
         }
-
     }
 }

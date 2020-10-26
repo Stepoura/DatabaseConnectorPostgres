@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DbEngDatabaseConnectorPostgresine.DAL
 {
-	public class DbFeatureClass: IDisposable
+	public class DbFeatureClass
 	{
 		private NpgsqlConnection _connection;
 
@@ -271,11 +271,6 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
 				}
 
 			}
-		}
-
-		public void Dispose()
-		{
-			throw new NotImplementedException();
 		}
 	}
 }
