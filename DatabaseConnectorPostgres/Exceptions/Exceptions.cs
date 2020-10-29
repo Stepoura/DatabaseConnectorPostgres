@@ -131,9 +131,9 @@ namespace DatabaseConnectorPostgres.Exceptions
 		}
 	}
 
-	public class GetAllUserException : Exception
+	public class GetAllFeaturesException : Exception
 	{
-		public GetAllUserException() : base("GetAllUserException Exception")
+		public GetAllFeaturesException() : base("GetAllFeaturesException thrown")
 		{
 		}
 	}

@@ -126,49 +126,42 @@ namespace DatabaseConnectorPostgres.DAL
 				}
 		}
 
-		public DbFeatureClassAttribute CreateAttribute(string name, DbFeatureClassAttribute.DataTypes dataType, bool nullable, long length = 0L, long precision = 0L)
+		public async Task<DbFeatureClassAttribute> CreateAttributeAsync(string name, DbFeatureClassAttribute.DataTypes dataType, bool nullable, long length = 0L, long precision = 0L)
 		{
-			//bool flag = length == 0L;
-			//if (flag)
-			//{
-			//	bool flag2 = dataType == DbFeatureClassAttribute.DataTypes.type_int;
-			//	if (flag2)
-			//	{
-			//		length = 10L;
-			//	}
-			//	else
-			//	{
-			//		bool flag3 = dataType == DbFeatureClassAttribute.DataTypes.type_nvarchar;
-			//		if (flag3)
-			//		{
-			//			length = 255L;
-			//		}
-			//		else
-			//		{
-			//			bool flag4 = dataType == DbFeatureClassAttribute.DataTypes.type_serial;
-			//			if (flag4)
-			//			{
-			//				length = 10L;
-			//			}
-			//		}
-			//	}
-			//}
-			//DbFeatureClassAttribute dbFeatureClassAttribute = new DbFeatureClassAttribute(name, dataType, nullable, length, precision);
-			//string alterTableCreateColumnString = DbSqlStringBuilder.GetAlterTableCreateColumnString(_tableName, dbFeatureClassAttribute);
-			//bool flag5 = !DbHelper.DbSqlExecuter.Execute(_connection, alterTableCreateColumnString);
-			//DbFeatureClassAttribute result;
-			//if (flag5)
-			//{
-			//	result = null;
-			//}
-			//else
-			//{
-			//	_internalFeatureClassAttributeList.Add(dbFeatureClassAttribute);
-			//	result = dbFeatureClassAttribute;
-			//}
-			//return result;
-			return null;
-		}
+            bool flag = length == 0L;
+            if (flag)
+            {
+                bool flag2 = dataType == DbFeatureClassAttribute.DataTypes.type_int;
+                if (flag2)
+                {
+                    length = 10L;
+                }
+                else
+                {
+                    bool flag3 = dataType == DbFeatureClassAttribute.DataTypes.type_nvarchar;
+                    if (flag3)
+                    {
+                        length = 255L;
+                    }
+                    else
+                    {
+                        bool flag4 = dataType == DbFeatureClassAttribute.DataTypes.type_serial;
+                        if (flag4)
+                        {
+                            length = 10L;
+                        }
+                    }
+                }
+            }
+            DbFeatureClassAttribute dbFeatureClassAttribute = new DbFeatureClassAttribute(name, dataType, nullable, length, precision);
+            string alterTableCreateColumnString = DbSqlStringBuilder.GetAlterTableCreateColumnString(_tableName, dbFeatureClassAttribute);
+
+
+			await using (var cmd = new NpgsqlCommand(alterTableCreateColumnString, _connection))
+			await using (var reader = await cmd.ExecuteReaderAsync())
+            _internalFeatureClassAttributeList.Add(dbFeatureClassAttribute);
+            return dbFeatureClassAttribute;
+        }
 
 		public void DropAttribute(string attributeName)
 		{

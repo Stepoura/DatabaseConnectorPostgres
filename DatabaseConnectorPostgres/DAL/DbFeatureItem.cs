@@ -64,11 +64,11 @@ namespace DatabaseConnectorPostgres.DAL
 			FeatureClass.DeleteFeature(Feature);
 		}
 
-		public void Insert()
+		public async Task Insert()
 		{
 			DbFeatureClass arg_10_0 = FeatureClass;
 			DbFeature feature = Feature;
-			arg_10_0.InsertFeature(feature);
+			await arg_10_0.InsertFeature(feature);
 			Feature = feature;
 		}
 

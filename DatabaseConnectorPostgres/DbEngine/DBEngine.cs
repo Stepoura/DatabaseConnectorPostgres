@@ -1,7 +1,6 @@
 ﻿using DatabaseConnectorPostgres.DAL;
 using DatabaseConnectorPostgres.Exceptions;
 using DbEngDatabaseConnectorPostgresine.DAL;
-using log4net;
 using Microsoft.VisualBasic.CompilerServices;
 using Npgsql;
 using System;
@@ -16,8 +15,6 @@ namespace DatabaseConnectorPostgres.DbEngine
 {
     public class DbEngine: IDisposable
     {
-
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string DatabaseName
         {
             get
@@ -192,10 +189,10 @@ namespace DatabaseConnectorPostgres.DbEngine
                 await conn.OpenAsync();
                 await InitFeatureClassesAsync();
                 DbFeatureClass dbFeatureClass = FeatureClasses.CreateFeatureClass("settings");
-                dbFeatureClass.Attributes.CreateAttribute("db_version", DbFeatureClassAttribute.DataTypes.type_int, true, 0L, 0L);
+                await dbFeatureClass.Attributes.CreateAttributeAsync("db_version", DbFeatureClassAttribute.DataTypes.type_int, true, 0L, 0L);
                 DbFeature dbFeature = dbFeatureClass.CreateFeature();
                 dbFeature.Attributes["db_version"].Value = 0;
-                dbFeatureClass.InsertFeature(dbFeature);
+                await dbFeatureClass.InsertFeature(dbFeature);
                 RunDatabaseUpdate();
                 Reload();
                 await conn.CloseAsync();

@@ -10,13 +10,11 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DatabaseConnectorPostgres.Models
+namespace DatabaseConnectorPostgres.BLL
 {
 	public class User : DbFeatureItem
 	{
 		private const string TABLE_NAME = "users";
-
-
 		public string UserName
 		{
 			get
@@ -26,6 +24,18 @@ namespace DatabaseConnectorPostgres.Models
 			set
 			{
 				Feature.Attributes["username"].Value = value;
+			}
+		}
+
+		public int Id
+		{
+			get
+			{
+				return Feature.Attributes["id"].ValueInt;
+			}
+			set
+			{
+				Feature.Attributes["id"].Value = value;
 			}
 		}
 
@@ -65,7 +75,38 @@ namespace DatabaseConnectorPostgres.Models
 		{
 		}
 
-		public static User Get(DbFeature feature)
+		public static async Task<KeyValuePair<EnumUser, User>> CreateUser(NpgsqlConnection connection, string username, string password, bool isAdmin)
+		{
+			if (!await CheckIfExists(connection, username))
+			{
+				User newUser = await CreateNew(connection);
+				newUser.UserName = username;
+				HashingService hashingService = new HashingService();
+				newUser.Password = hashingService.CreatePasswordHash(password);
+				newUser.IsAdmin = isAdmin;
+				await newUser.Insert();
+				return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, newUser);
+			}
+			else
+			{
+				return new KeyValuePair<EnumUser, User>(EnumUser.USER_EXISTS, null);
+			}
+		}
+
+		private static async Task<User> CreateNew(NpgsqlConnection connection)
+		{
+			DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
+			return new User(dbFeatureClass.CreateFeature());
+		}
+
+		private static async Task<bool> CheckIfExists(NpgsqlConnection connection, string username)
+		{
+			DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
+			List<DbFeature> features = await dbFeatureClass.GetFeatures(string.Format("username = '{0}'", username), "");
+			return features.Count > 0;
+		}
+
+		private static User Get(DbFeature feature)
 		{
 			User user = new User(feature);
 			bool flag = user.Feature == null;
@@ -138,7 +179,7 @@ namespace DatabaseConnectorPostgres.Models
 			}
 			catch
 			{
-				throw new GetAllUserException();
+				throw new GetAllFeaturesException();
 			}
 			return list;
 		}
