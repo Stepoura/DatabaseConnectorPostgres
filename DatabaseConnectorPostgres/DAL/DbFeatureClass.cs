@@ -75,6 +75,11 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
             List<DbFeature> list = new List<DbFeature>();
             string selectString = DbSqlStringBuilder.GetSelectString(Name, Attributes.ToNameArray(), whereStatement, orderStatement);
 
+            if (_connection.State == ConnectionState.Closed)
+            {
+                await _connection.OpenAsync();
+            }
+
             await using (var cmd = new NpgsqlCommand(selectString, _connection))
             await using (var reader = await cmd.ExecuteReaderAsync())
                 while (await reader.ReadAsync())
@@ -145,6 +150,11 @@ namespace DbEngDatabaseConnectorPostgresine.DAL
                 if (flag2)
                 {
                     _connection.Open();
+                }
+
+                if (_connection.State == System.Data.ConnectionState.Closed)
+                {
+                    await _connection.OpenAsync();
                 }
 
                 await using (var cmd = new NpgsqlCommand(insertRowString, _connection))

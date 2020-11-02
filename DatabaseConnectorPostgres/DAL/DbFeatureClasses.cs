@@ -99,6 +99,11 @@ namespace DatabaseConnectorPostgres.DAL
                 "table_name"
             }, "table_schema = 'public' and table_type = 'BASE TABLE' ORDER BY table_schema,table_name", "");
 
+			if (_connection.State == System.Data.ConnectionState.Closed)
+			{
+				await _connection.OpenAsync();
+			}
+
 			await using (var cmd = new NpgsqlCommand(selectString, _connection))
 			await using (var reader = await cmd.ExecuteReaderAsync())
 				while (await reader.ReadAsync())

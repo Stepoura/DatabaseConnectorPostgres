@@ -71,6 +71,18 @@ namespace DatabaseConnectorPostgres.BLL
 			}
 		}
 
+		public string Email
+		{
+			get
+			{
+				return Feature.Attributes["email"].ValueString;
+			}
+			set
+			{
+				Feature.Attributes["email"].Value = value;
+			}
+		}
+
 		private User(DbFeature feature) : base(feature)
 		{
 		}
@@ -84,6 +96,7 @@ namespace DatabaseConnectorPostgres.BLL
 				HashingService hashingService = new HashingService();
 				newUser.Password = hashingService.CreatePasswordHash(password);
 				newUser.IsAdmin = isAdmin;
+				newUser.Email = string.Format("{0}@nBeat.com", username).Replace(" ", "");
 				await newUser.Insert();
 				return new KeyValuePair<EnumUser, User>(EnumUser.SUCCESS, newUser);
 			}

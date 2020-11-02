@@ -70,14 +70,16 @@ namespace DatabaseConnectorPostgres.DAL
 			DbFeature feature = Feature;
 			await arg_10_0.InsertFeature(feature);
 			Feature = feature;
+			await Connection.CloseAsync();
 		}
 
-		public void Update()
+		public async Task UpdateAsync()
 		{
 			DbFeatureClass arg_10_0 = FeatureClass;
 			DbFeature feature = Feature;
 			arg_10_0.UpdateFeature(feature);
 			Feature = feature;
+			await Connection.CloseAsync();
 		}
 	}
 }

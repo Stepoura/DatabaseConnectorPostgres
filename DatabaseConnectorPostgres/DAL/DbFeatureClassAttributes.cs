@@ -117,6 +117,12 @@ namespace DatabaseConnectorPostgres.DAL
 
 		private async Task InitFeatureClassAttributeList()
 		{
+
+			if(_connection.State == System.Data.ConnectionState.Closed)
+            {
+				await _connection.OpenAsync();
+            }
+
 			await using (var cmd = new NpgsqlCommand(string.Format("SELECT table_catalog, column_name, data_type, CASE WHEN is_nullable = 'YES' THEN 0 ELSE 1 end As nullable from information_schema.columns where table_name = '{0}'", _tableName), _connection))
 			await using (var reader = await cmd.ExecuteReaderAsync())
 				while (await reader.ReadAsync())
@@ -156,6 +162,10 @@ namespace DatabaseConnectorPostgres.DAL
             DbFeatureClassAttribute dbFeatureClassAttribute = new DbFeatureClassAttribute(name, dataType, nullable, length, precision);
             string alterTableCreateColumnString = DbSqlStringBuilder.GetAlterTableCreateColumnString(_tableName, dbFeatureClassAttribute);
 
+			if (_connection.State == System.Data.ConnectionState.Closed)
+			{
+				await _connection.OpenAsync();
+			}
 
 			await using (var cmd = new NpgsqlCommand(alterTableCreateColumnString, _connection))
 			await using (var reader = await cmd.ExecuteReaderAsync())

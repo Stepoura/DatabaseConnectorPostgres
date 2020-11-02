@@ -1,5 +1,6 @@
 ﻿using DatabaseConnectorPostgres.BLL;
 using DatabaseConnectorPostgres.DbEngine;
+using DbTest.Helper;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -11,12 +12,16 @@ namespace DbTest
 {
     class Program
     {
-        private static readonly string name = "nils";
+        private static string name = "";
 
         [STAThread]
         static async Task Main(string[] args)
         {
-            await InsertUserAsync();
+            for(int i = 0; i < 100; i++)
+            {
+                await InsertUserAsync();
+                await Task.Delay(300);
+            }
         }
 
         private static async Task ListAllYtAsync()
@@ -41,16 +46,40 @@ namespace DbTest
 
         private static async Task InsertUserAsync()
         {
+            Random rand = new Random(DateTime.Now.Second); // we need a random variable to select names randomly
+            RandomName nameGen = new RandomName(rand); // create a new instance of the RandomName class
+            name = nameGen.Generate(Sex.Male, 1); // generate a male name, with one middal name.
+
             using (var db = await DbEngine.Instance())
             {
-                KeyValuePair<EnumUser, User> newUser = await CreateUser(db.Connection, "blub1", "test1234", true);
+                KeyValuePair<EnumUser, User> newUser = await CreateUser(db.Connection, name, "test1234", true);
                 if (newUser.Key == EnumUser.SUCCESS)
                 {
+                    await InsertPgpAsync();
                     Console.WriteLine("User created!");
                 }
                 else
                 {
                     Console.WriteLine("User exists");
+                }
+                Console.Write("\n");
+            }
+        }
+
+        private static async Task InsertPgpAsync()
+        {
+            var user = await GetUser();
+            using (var db = await DbEngine.Instance())
+            {
+                KeyValuePair<EnumPgp, UserPgp> newPgp = await UserPgp.CreatePgpKeys(db.Connection, user);
+                if (newPgp.Key == EnumPgp.SUCCESS)
+                {
+                    Console.WriteLine("Pgp created!");
+                    var details = await UserPgp.Get(db.Connection, user.Id);
+                }
+                else
+                {
+                    Console.WriteLine("Pgp exists");
                 }
                 Console.Write("\n");
             }
@@ -76,7 +105,7 @@ namespace DbTest
             }
         }
 
-        private static async Task GetUser()
+        private static async Task<User> GetUser()
         {
             using (var db = await DbEngine.Instance())
             {
@@ -89,7 +118,7 @@ namespace DbTest
                 {
                     Console.WriteLine(user.Key.ToString());
                 }
-
+                return user.Value;
             }
         }
 
