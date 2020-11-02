@@ -91,39 +91,34 @@ namespace DatabaseConnectorPostgres.BLL
 
         public static async Task<KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>> GetAll(NpgsqlConnection connection)
         {
+
+            DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
+            List<DbFeature> features = await dbFeatureClass.GetFeatures();
+            List<YoutubeVideo> list = new List<YoutubeVideo>();
+
             try
             {
-                DbFeatureClass dbFeatureClass = await DbFeatureClass.BuildDbFeatureClassAsync(connection, TABLE_NAME);
-                List<DbFeature> features = await dbFeatureClass.GetFeatures();
-                List<YoutubeVideo> list = new List<YoutubeVideo>();
-
-                try
+                foreach (var entry in features)
                 {
-                    foreach (var entry in features)
-                    {
-                        DbFeature current = entry;
-                        list.Add(Get(current));
-                    }
-                }
-                catch
-                {
-                    return new KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>(EnumYtVideos.FAILED, list);
-                    throw new GetAllFeaturesException();
-                }
-
-                if (list.Count == 0)
-                {
-                    return new KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>(EnumYtVideos.NO_VIDEOS_FOUND, list);
-                }
-                else
-                {
-                    return new KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>(EnumYtVideos.SUCCESS, list);
+                    DbFeature current = entry;
+                    list.Add(Get(current));
                 }
             }
             catch
             {
-                throw new GetFeaturesException();
+                return new KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>(EnumYtVideos.FAILED, list);
+                throw new GetAllFeaturesException();
             }
+
+            if (list.Count == 0)
+            {
+                return new KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>(EnumYtVideos.NO_VIDEOS_FOUND, list);
+            }
+            else
+            {
+                return new KeyValuePair<EnumYtVideos, IList<YoutubeVideo>>(EnumYtVideos.SUCCESS, list);
+            }
+
         }
 
         public enum EnumYtVideos
